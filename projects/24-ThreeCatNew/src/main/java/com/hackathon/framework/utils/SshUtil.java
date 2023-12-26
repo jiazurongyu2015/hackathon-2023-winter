@@ -71,19 +71,40 @@ public class SshUtil {
         // session建立连接后，执行shell命令
         ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
         channelExec.setCommand(cmd);
+        channelExec.setErrStream(System.err);
+        channelExec.setOutputStream(System.out);
+        // getInputStream输入流就是从服务器端发回的数据
+        InputStream in = channelExec.getInputStream();
+        InputStream err = channelExec.getErrStream();
         channelExec.connect();
-        // 获取执行结果的输入流
-        StringBuilder output = new StringBuilder();
+        StringBuilder outputStream = new StringBuilder();
+        StringBuilder errorStream = new StringBuilder();
         byte[] buffer = new byte[1024];
-        while (channelExec.getExitStatus() == -1) {
-            while (channelExec.getInputStream().available() > 0) {
-                int bytesRead = channelExec.getInputStream().read(buffer);
-                output.append(new String(buffer, 0, bytesRead));
+        while (true) {
+            if (in.available() > 0) {
+                int i = in.read(buffer, 0, 1024);
+                if (i < 0) break;
+                outputStream.append(new String(buffer, 0, i));
             }
-            Thread.sleep(100);
+            if (err.available() > 0) {
+                int i = err.read(buffer, 0, 1024);
+                if (i < 0) break;
+                errorStream.append(new String(buffer, 0, i));
+            }
+            if (channelExec.isClosed()) {
+                System.out.println("Exit status: " + channelExec.getExitStatus());
+                break;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         channelExec.disconnect();
-        return output.toString();
+        session.disconnect();
+        System.err.println("错误的日志:"+errorStream.toString());
+        return outputStream.toString();
     }
 
 
