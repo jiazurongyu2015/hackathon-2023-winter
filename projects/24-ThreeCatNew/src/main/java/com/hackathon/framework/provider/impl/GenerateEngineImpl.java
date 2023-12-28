@@ -52,16 +52,16 @@ public class GenerateEngineImpl implements GenerateEngine {
         // 代码逻辑待补
 
         // 检测环境命令
-        String solcVersion = "solcjs --version";
+        String solcVersion = "solc --version";
         String truffleVersion = "truffle --version";
         String errText = "";
         String soclcVersionResult = sshUtil.executeCmd(solcVersion);
-        if (!soclcVersionResult.contains("not found")) {
-            errText += "solcjs is not installed";
+        if (soclcVersionResult.contains("not found")) {
+            errText += "solc is not installed";
         }
         // 这里判断的是truffleVersion读取，这里错误已经修改
         String truffleVersionResult = sshUtil.executeCmd(truffleVersion);
-        if (!truffleVersionResult.contains("not found")) {
+        if (truffleVersionResult.contains("not found")) {
             errText += "truffle is not installed";
         }
         return new Result(startTime, errText, "successfully");
