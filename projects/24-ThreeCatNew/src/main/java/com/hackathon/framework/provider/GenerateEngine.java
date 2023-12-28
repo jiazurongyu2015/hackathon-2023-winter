@@ -41,7 +41,7 @@ public interface GenerateEngine {
      * @throws JSchException
      * @throws InterruptedException
      */
-    Result initDirectoryForServer() throws IOException, InvocationTargetException, IllegalAccessException, JSchException, InterruptedException, SftpException;
+    Result initDirectoryForServer(String dirPathParameter) throws IOException, InvocationTargetException, IllegalAccessException, JSchException, InterruptedException, SftpException;
 
     /**
      * 初始化生成目录

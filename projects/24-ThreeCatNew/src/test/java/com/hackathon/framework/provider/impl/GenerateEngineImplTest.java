@@ -48,12 +48,10 @@ class GenerateEngineImplTest {
 
     @Test
     void testInitDirectoryForServer() throws JSchException, IOException, InterruptedException, InvocationTargetException, IllegalAccessException, SftpException {
-        when(strategyBean.getEnginePath()).thenReturn("getEnginePathResponse");
         when(strategyBean.getDirectory()).thenReturn(Arrays.<String>asList("String"));
         when(strategyBean.getCompile()).thenReturn("getCompileResponse");
         when(sshUtil.executeCmd(anyString())).thenReturn("executeCmdResponse");
-
-        Result result = generateEngineImpl.initDirectoryForServer();
+        Result result = generateEngineImpl.initDirectoryForServer("/root/demoProject");
         Assertions.assertEquals(new Result(0L, "hasError", "result"), result);
     }
 

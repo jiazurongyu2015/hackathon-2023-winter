@@ -77,20 +77,19 @@ public class GenerateEngineImpl implements GenerateEngine {
      * @throws JSchException
      * @throws InterruptedException
      */
-    public Result initDirectoryForServer() throws JSchException, SftpException, IOException, InvocationTargetException, IllegalAccessException, InterruptedException {
+    public Result initDirectoryForServer(String dirPathParameter) throws JSchException, SftpException, IOException, InvocationTargetException, IllegalAccessException, InterruptedException {
         long startTime = System.nanoTime();
         // 创建工程名称
         strategyBean = StrategyConfigUtil.getStrategy("generateEngine");
-        String mkdirCommand = "mkdir " + strategyBean.getEnginePath();
-        sshUtil.executeCmd(mkdirCommand);
-        // 进入目录执行init
-        sshUtil.executeCmd("cd " + strategyBean.getEnginePath());
         Result envResult = this.preCheckGenerationEnv();
-        String errorMessage = "";
+        String errorMessage;
         // 判断是否错误可以往下走这么写，hasError要返回参数啊!
         if (envResult.getHasError().isEmpty()) {
-            String compileName = strategyBean.getCompile();
-            sshUtil.executeCmd(compileName + " init");
+            projectPath = dirPathParameter;
+            System.out.println("可以执行初始化项目");
+            String compileCommand = strategyBean.getCompile()+ " init "+ dirPathParameter;
+            String initResult = sshUtil.executeCmd(compileCommand);
+            System.out.println("初始化Result"+initResult);
             List<String> compileList = strategyBean.getDirectory();
             // 获取当前路径下的文件和文件夹
             String initPathList = sshUtil.getFolder();
@@ -154,7 +153,7 @@ public class GenerateEngineImpl implements GenerateEngine {
         // 代码逻辑待补
         // mv操作应是在truffle初始化的目录下进行
         strategyBean = StrategyConfigUtil.getStrategy("generateEngine");
-        String mvContractCommand = "mv /root/Hackathon-2023-winter/contract/* " + strategyBean.getEnginePath() + "/contracts/";
+        String mvContractCommand = "mv /root/Hackathon-2023-winter/contract/* " + projectPath + "/contracts/";
         String errorMessage = sshUtil.executeCmd(mvContractCommand);
         return new Result(startTime, errorMessage, "");
     }
@@ -172,11 +171,9 @@ public class GenerateEngineImpl implements GenerateEngine {
     @Override
     public Result compilationContract(String contractOne, String contractTwo) throws IOException, InvocationTargetException, IllegalAccessException, JSchException, InterruptedException {
         long startTime = System.nanoTime();
-        strategyBean = StrategyConfigUtil.getStrategy("generateEngine");
         String errorMessage = "";
         Map<String, String> resultMap = new HashMap<>(65535,0.9f);
         // 存储类变量
-        projectPath = strategyBean.getEnginePath();
         try {
             // 拷贝模板truffle-config.js
             String cpTemplateConfigurationFile = "cp -f /root/truffle-config.js " + projectPath + "/truffle-config.js";

@@ -1,14 +1,12 @@
 # 界面参数默认提供的
 guiCommand:
   # 组合输入框
-  comboBox: {"生成工程":init <替换生成目标绝对路径>,"生成测试文件":genTest <合约abi文件路径> <sol合约文件地址> <自定义生成test文件路径>,"收集覆盖":compile --coverage <上面自定义生成test文件路径>}
+  comboBox: {"生成工程":init <输入服务器绝对路径>,"生成测试文件":genTest <合约abi文件路径> <sol合约文件地址> <自定义生成test文件路径>,"收集覆盖":compile --coverage <上面自定义生成test文件路径>}
 
 # 第一阶段 生成测试工程
 generateEngine:
-  # 服务器上面的工程地址
-  enginePath: xxx
   # 合约地址
-  contractAddress: xxxx
+  contractAddress: 待补
   # 合约类型
   contractType: sol
   # 开发框架 检查编译方式对应的合约目录

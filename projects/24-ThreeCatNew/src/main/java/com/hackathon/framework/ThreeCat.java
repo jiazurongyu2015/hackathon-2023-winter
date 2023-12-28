@@ -102,8 +102,8 @@ public class ThreeCat extends JFrame {
                 System.out.println(command);
                 if (command.contains("init")) {
                     ReportUtil.clearReport();
-                    String parameter = command.replace("init", "").trim();
-                    System.out.println(parameter);
+                    String dirPathParameter = command.replace("init", "").trim();
+                    System.out.println("服务器上面目录地址:"+dirPathParameter);
                     try {
                         strategy = StrategyConfigUtil.getStrategy("generateEngine");
                     } catch (FileNotFoundException | InvocationTargetException | IllegalAccessException ex) {
@@ -112,7 +112,7 @@ public class ThreeCat extends JFrame {
                     // 初始化
                     Result initDirResult;
                     try {
-                        initDirResult = generateEngine.initDirectoryForServer();
+                        initDirResult = generateEngine.initDirectoryForServer(dirPathParameter);
                     } catch (IOException | InvocationTargetException | IllegalAccessException | JSchException |
                              InterruptedException | SftpException ex) {
                         throw new RuntimeException(ex);
