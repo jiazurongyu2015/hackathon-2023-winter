@@ -30,6 +30,9 @@ public class GenerateEngineImpl implements GenerateEngine {
 
     private String projectPath = "";
 
+    // 存储用户输入的绝对路径
+    private String dirPathParameter;
+
     @Override
     public Result getStrategy(String generateType) throws FileNotFoundException, InvocationTargetException, IllegalAccessException {
         long startTime = System.nanoTime();
@@ -77,12 +80,13 @@ public class GenerateEngineImpl implements GenerateEngine {
      * @throws JSchException
      * @throws InterruptedException
      */
-    public Result initDirectoryForServer(String dirPathParameter) throws JSchException, SftpException, IOException, InvocationTargetException, IllegalAccessException, InterruptedException {
+    public Result initDirectoryForServer(String dirPathParameter_tmp) throws JSchException, SftpException, IOException, InvocationTargetException, IllegalAccessException, InterruptedException {
         long startTime = System.nanoTime();
         // 创建工程名称
         strategyBean = StrategyConfigUtil.getStrategy("generateEngine");
         Result envResult = this.preCheckGenerationEnv();
         String errorMessage;
+        dirPathParameter = dirPathParameter_tmp;
         // 判断是否错误可以往下走这么写，hasError要返回参数啊!
         if (envResult.getHasError().isEmpty()) {
             projectPath = dirPathParameter;
@@ -152,8 +156,7 @@ public class GenerateEngineImpl implements GenerateEngine {
         long startTime = System.nanoTime();
         // 代码逻辑待补
         // mv操作应是在truffle初始化的目录下进行
-        strategyBean = StrategyConfigUtil.getStrategy("generateEngine");
-        String mvContractCommand = "mv /root/Hackathon-2023-winter/contract/* " + projectPath + "/contracts/";
+        String mvContractCommand = "mv /root/Hackathon-2023-winter/contract/* " + dirPathParameter + "/contracts/";
         String errorMessage = sshUtil.executeCmd(mvContractCommand);
         return new Result(startTime, errorMessage, "");
     }
@@ -176,13 +179,10 @@ public class GenerateEngineImpl implements GenerateEngine {
         // 存储类变量
         try {
             // 拷贝模板truffle-config.js
-            String cpTemplateConfigurationFile = "cp -f /root/truffle-config.js " + projectPath + "/truffle-config.js";
+            String cpTemplateConfigurationFile = "cp -f /root/truffle-config.js " + dirPathParameter + "/truffle-config.js";
             sshUtil.executeCmd(cpTemplateConfigurationFile);
-            // 没有返回，有返回也是去验证cp -f是否成功
-            String cdPathCommand = "cd " + projectPath;
-            sshUtil.executeCmd(cdPathCommand);
             // 编译合约
-            String compileContractCommand = "truffle compile";
+            String compileContractCommand = "truffle compile " + dirPathParameter;
             sshUtil.executeCmd(compileContractCommand);
         }catch (Exception e){
             errorMessage += e;
@@ -216,19 +216,19 @@ public class GenerateEngineImpl implements GenerateEngine {
         long startTime = System.nanoTime();
         String errorMessage = "";
         // 编译后检查
-        String solPathOne = projectPath + File.separator+ "contracts/" + contractOne + ".sol";
+        String solPathOne = dirPathParameter + File.separator+ "contracts/" + contractOne + ".sol";
         if(!FileUtil.existsFile(solPathOne)){
             errorMessage = solPathOne+"文件不存在。";
         }
-        String solPathTwo = projectPath + File.separator+ "contracts/" + contractTwo + ".sol";
+        String solPathTwo = dirPathParameter + File.separator+ "contracts/" + contractTwo + ".sol";
         if(!FileUtil.existsFile(solPathTwo)){
             errorMessage = solPathTwo+"文件不存在。";
         }
-        String abiJsonOne = projectPath + "/build/contracts/" + contractOne + ".json";
+        String abiJsonOne = dirPathParameter + "/build/contracts/" + contractOne + ".json";
         if(!FileUtil.existsFile(abiJsonOne)){
             errorMessage = abiJsonOne+"文件不存在。";
         }
-        String abiJsonTwo = projectPath + "/build/contracts/" + contractTwo + ".json";
+        String abiJsonTwo = dirPathParameter + "/build/contracts/" + contractTwo + ".json";
         if(!FileUtil.existsFile(abiJsonTwo)){
             errorMessage = abiJsonTwo+"文件不存在。";
         }
